@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hearindex — Hearing Disability Calculator · Audmetrix</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ══════════════════════════════════════════════════
+       THEME TOKENS — DARK (default)
+    ══════════════════════════════════════════════════ */
+    :root,
+    [data-theme="dark"] {
+      --bg:           #090d13;
+      --surface:      #101720;
+      --surface-2:    #161f2c;
+      --surface-3:    #1c2636;
+      --border:       #1c2b3a;
+      --border-hi:    #27405a;
+      --accent:       #00e5a0;
+      --accent-dim:   #00b87a;
+      --accent-glow:  rgba(0,229,160,0.14);
+      --accent-btn:   #021a0e;  /* text on accent btn */
+      --blue:         #6aaee8;
+      --warn:         #ff6b4a;
+      --warn-dim:     rgba(255,107,74,0.12);
+      --text:         #dde8f5;
+      --text-2:       #7a90a8;
+      --text-3:       #3d5468;
+      --grid-color:   #1c2b3a;
+      --grid-opacity: 0.4;
+      --glow-color:   rgba(0,229,160,0.04);
+      --shadow:       rgba(0,0,0,0.5);
+      --logo-hi:      #00e5a0;
+      --toggle-bg:    #1c2636;
+      --toggle-knob:  #374f68;
+      --toggle-icon:  #8aacca;
+    }
+
+    /* ══════════════════════════════════════════════════
+       THEME TOKENS — LIGHT
+    ══════════════════════════════════════════════════ */
+    [data-theme="light"] {
+      --bg:           #f0f4f8;
+      --surface:      #ffffff;
+      --surface-2:    #f5f8fb;
+      --surface-3:    #eaf0f7;
+      --border:       #d4dde8;
+      --border-hi:    #b0c4d8;
+      --accent:       #007a55;
+      --accent-dim:   #005c3e;
+      --accent-glow:  rgba(0,122,85,0.1);
+      --accent-btn:   #ffffff;
+      --blue:         #2b6cb0;
+      --warn:         #c0392b;
+      --warn-dim:     rgba(192,57,43,0.1);
+      --text:         #1a2636;
+      --text-2:       #4a6480;
+      --text-3:       #8aa0b8;
+      --grid-color:   #c8d8e8;
+      --grid-opacity: 0.6;
+      --glow-color:   rgba(0,122,85,0.04);
+      --shadow:       rgba(0,0,0,0.08);
+      --logo-hi:      #007a55;
+      --toggle-bg:    #dde8f2;
+      --toggle-knob:  #ffffff;
+      --toggle-icon:  #4a6480;
+    }
+
+    /* ══════════════════════════════════════════════════
+       BASE RESET
+    ══════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 2rem 1rem 3rem;
+      position: relative;
+      overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* ── Background grid ─────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: var(--grid-opacity);
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 55% at 50% 35%, var(--glow-color) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════════════
+       TOP BAR (brand + theme toggle)
+    ══════════════════════════════════════════════════ */
+    .topbar {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 1.75rem;
+    }
+
+    /* ── Logo block ──────────────────────────────── */
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px var(--accent-glow);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .logo-mark svg { color: var(--accent-btn); }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .logo-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      transition: color 0.3s;
+    }
+
+    .logo-name em {
+      font-style: normal;
+      color: var(--logo-hi);
+    }
+
+    .logo-company {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      transition: color 0.3s;
+    }
+
+    /* ── Theme Toggle ────────────────────────────── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px 5px 8px;
+      cursor: pointer;
+      transition: background 0.3s, border 0.3s;
+      outline: none;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .theme-toggle:hover { border-color: var(--border-hi); }
+
+    .theme-toggle .t-icon {
+      width: 20px; height: 20px;
+      color: var(--toggle-icon);
+      transition: color 0.3s, transform 0.4s;
+      flex-shrink: 0;
+    }
+
+    /* sun hidden in dark, moon hidden in light */
+    [data-theme="dark"]  .icon-sun  { display: none; }
+    [data-theme="dark"]  .icon-moon { display: block; }
+    [data-theme="light"] .icon-sun  { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    .theme-toggle .t-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      transition: color 0.3s;
+    }
+
+    /* ══════════════════════════════════════════════════
+       MAIN CONTAINER
+    ══════════════════════════════════════════════════ */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 600px;
+      animation: fadeUp 0.55s cubic-bezier(.22,.68,0,1.2) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Page Header ─────────────────────────────── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-glow);
+      border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.67rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 0.85rem;
+      transition: background 0.3s, border 0.3s, color 0.3s;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 2s infinite;
+      transition: background 0.3s;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--text);
+      transition: color 0.3s;
+    }
+
+    .page-subtitle {
+      margin-top: 0.45rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-2);
+      letter-spacing: 0.03em;
+      transition: color 0.3s;
+    }
+
+    /* ══════════════════════════════════════════════════
+       CARD
+    ══════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 40px var(--shadow);
+      transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    /* ── Inputs Grid ─────────────────────────────── */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      transition: color 0.3s;
+    }
+
+    .ear-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .ear-icon.better { color: var(--accent); }
+    .ear-icon.poorer { color: var(--blue); }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem 3.2rem 0.8rem 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
+      -moz-appearance: textfield;
+    }
+
+    .input-wrap input::-webkit-outer-spin-button,
+    .input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .input-wrap input::placeholder { color: var(--text-3); }
+
+    .input-wrap input:focus {
+      border-color: var(--accent-dim);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .input-wrap input.error {
+      border-color: var(--warn);
+      box-shadow: 0 0 0 3px var(--warn-dim);
+    }
+
+    .input-unit {
+      position: absolute;
+      right: 0.9rem; top: 50%;
+      transform: translateY(-50%);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.64rem;
+      color: var(--text-3);
+      letter-spacing: 0.05em;
+      pointer-events: none;
+      transition: color 0.3s;
+    }
+
+    .field-error {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.67rem;
+      color: var(--warn);
+      min-height: 1rem;
+      letter-spacing: 0.02em;
+      transition: color 0.3s;
+    }
+
+    /* ── Buttons ─────────────────────────────────── */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      padding: 0.85rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-btn);
+      transition: background 0.3s, color 0.3s, transform 0.18s, box-shadow 0.18s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px var(--accent-glow);
+    }
+
+    .btn-primary:active { transform: translateY(0); box-shadow: none; }
+
+    .btn-reset {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      padding: 0.85rem 1rem;
+      transition: all 0.18s ease, background 0.3s, border 0.3s, color 0.3s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--border-hi);
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    /* ── Result Panel ────────────────────────────── */
+    .result-panel {
+      margin-top: 1.5rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: none;
+      transition: background 0.3s, border 0.3s;
+    }
+
+    .result-panel.visible {
+      display: block;
+      animation: slideIn 0.3s cubic-bezier(.22,.68,0,1.2);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .result-main {}
+
+    .result-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.67rem;
+      color: var(--text-3);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+      transition: color 0.3s;
+    }
+
+    .result-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 3rem;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      transition: color 0.3s;
+    }
+
+    .result-value span {
+      font-size: 1.4rem;
+      color: var(--accent-dim);
+      margin-left: 2px;
+    }
+
+    .result-category {
+      margin-top: 0.55rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Breakdown ───────────────────────────────── */
+    .breakdown {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+      transition: border-color 0.3s;
+    }
+
+    .breakdown-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .breakdown-item label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-3);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .breakdown-item value {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--text);
+      transition: color 0.3s;
+    }
+
+    /* ── WHO Scale ───────────────────────────────── */
+    .who-scale {
+      margin-top: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .who-scale-header {
+      background: var(--surface-3);
+      padding: 0.6rem 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.64rem;
+      color: var(--text-3);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+
+    .who-row {
+      display: flex;
+      align-items: center;
+      padding: 0.55rem 1rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s, border-color 0.3s;
+    }
+
+    .who-row:last-child { border-bottom: none; }
+
+    .who-row.active { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+
+    .who-swatch {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin-right: 0.75rem;
+    }
+
+    .who-grade {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text);
+      flex: 1;
+      transition: color 0.3s;
+    }
+
+    .who-range {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.67rem;
+      color: var(--text-3);
+      transition: color 0.3s;
+    }
+
+    .who-row.active .who-grade { color: var(--accent); }
+    .who-row.active .who-range { color: var(--accent-dim); }
+
+    /* ── Formula Section ─────────────────────────── */
+    .formula-section { margin-top: 1.5rem; }
+
+    .formula-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-3);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0;
+      transition: color 0.18s;
+    }
+
+    .formula-toggle:hover { color: var(--accent); }
+    .formula-toggle:focus-visible { outline: 2px solid var(--accent); border-radius: 3px; }
+
+    .toggle-arrow { transition: transform 0.22s; display: inline-block; }
+    .formula-toggle[aria-expanded="true"] .toggle-arrow { transform: rotate(90deg); }
+
+    .formula-body {
+      display: none;
+      margin-top: 0.75rem;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.74rem;
+      color: var(--text-2);
+      line-height: 1.85;
+      transition: background 0.3s, border 0.3s, color 0.3s;
+    }
+
+    .formula-body.open { display: block; animation: slideIn 0.22s ease; }
+
+    .formula-body code {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      color: var(--accent);
+      white-space: pre;
+      font-size: 0.7rem;
+      overflow-x: auto;
+      transition: background 0.3s, border 0.3s, color 0.3s;
+    }
+
+    .formula-body p { margin-bottom: 0.3rem; }
+    .formula-body strong { color: var(--text); font-weight: 500; transition: color 0.3s; }
+
+    /* ══════════════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════════════ */
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .footer-dev {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      margin-bottom: 1rem;
+      transition: background 0.3s, border 0.3s;
+    }
+
+    .footer-dev-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-3);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .footer-dev-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      transition: color 0.3s;
+    }
+
+    .footer-dev-role {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      transition: color 0.3s;
+    }
+
+    .footer-legal {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      transition: color 0.3s;
+    }
+
+    .footer-legal a {
+      color: var(--accent-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-legal a:hover { color: var(--accent); }
+
+    /* ══════════════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .card { padding: 1.4rem 1.1rem; }
+      .inputs-grid { grid-template-columns: 1fr; }
+      .breakdown { grid-template-columns: 1fr 1fr; }
+      .result-value { font-size: 2.4rem; }
+      .topbar { padding-bottom: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<div class="topbar">
+
+  <!-- Logo -->
+  <div class="logo-block" role="banner">
+    <div class="logo-mark" aria-hidden="true">
+      <!-- Waveform / ear icon -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12h2l2-6 3 12 2-9 2 6h3"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-name">Hear<em>index</em></span>
+      <span class="logo-company">by Audmetrix</span>
+    </div>
+  </div>
+
+  <!-- Theme Toggle -->
+  <button
+    class="theme-toggle"
+    id="themeToggle"
+    aria-label="Toggle light and dark mode"
+    title="Toggle theme"
+  >
+    <!-- Moon (shown in dark mode) -->
+    <svg class="t-icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    </svg>
+    <!-- Sun (shown in light mode) -->
+    <svg class="t-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+    <span class="t-label" id="themeLabel">Dark</span>
+  </button>
+
+</div>
+
+<!-- ══════════ MAIN CONTAINER ══════════ -->
+<div class="container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="badge"><span class="badge-dot"></span>Clinical Tool · PTA Formula</div>
+    <h1 class="page-title">Hearing Disability<br>Calculator</h1>
+    <p class="page-subtitle">Monaural &amp; Binaural Impairment · AAO / IDEAS Standard</p>
+  </div>
+
+  <!-- ── Main Card ───────────────────────── -->
+  <div class="card" role="main">
+
+    <!-- Ear Input Fields -->
+    <div class="inputs-grid">
+
+      <!-- Better Ear -->
+      <div class="field">
+        <label class="field-label" for="betterEar">
+          <svg class="ear-icon better" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M6 12a6 6 0 0112 0c0 3.5-2 5.5-3 6.5a3 3 0 01-4.24-4.24"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+          Better Ear PTA
+        </label>
+        <div class="input-wrap">
+          <input
+            type="number" id="betterEar" name="betterEar"
+            min="0" max="120" step="0.1" placeholder="e.g. 30"
+            aria-label="Better ear Pure Tone Average in dB HL"
+            aria-describedby="betterEarErr"
+            autocomplete="off"
+          />
+          <span class="input-unit">dB HL</span>
+        </div>
+        <div class="field-error" id="betterEarErr" role="alert" aria-live="polite"></div>
+      </div>
+
+      <!-- Poorer Ear -->
+      <div class="field">
+        <label class="field-label" for="poorerEar">
+          <svg class="ear-icon poorer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M6 12a6 6 0 0112 0c0 3.5-2 5.5-3 6.5a3 3 0 01-4.24-4.24"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+          Poorer Ear PTA
+        </label>
+        <div class="input-wrap">
+          <input
+            type="number" id="poorerEar" name="poorerEar"
+            min="0" max="120" step="0.1" placeholder="e.g. 65"
+            aria-label="Poorer ear Pure Tone Average in dB HL"
+            aria-describedby="poorerEarErr"
+            autocomplete="off"
+          />
+          <span class="input-unit">dB HL</span>
+        </div>
+        <div class="field-error" id="poorerEarErr" role="alert" aria-live="polite"></div>
+      </div>
+
+    </div><!-- /inputs-grid -->
+
+    <!-- Action Buttons -->
+    <div class="btn-row">
+      <button class="btn btn-primary" id="calcBtn" type="button" aria-label="Calculate hearing disability percentage">
+        Calculate
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+      <button class="btn btn-reset" id="resetBtn" type="button" aria-label="Reset all fields">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 12a9 9 0 109-9 9 9 0 00-9 9"/>
+          <polyline points="3 5 3 12 10 12"/>
+        </svg>
+        Reset
+      </button>
+    </div>
+
+    <!-- ── Result Panel ─────────────────── -->
+    <div class="result-panel" id="resultPanel" role="region" aria-label="Calculation results" aria-live="polite">
+      <div class="result-top">
+        <div class="result-main">
+          <div class="result-label">Hearing Disability</div>
+          <div class="result-value" id="resultValue">—<span>%</span></div>
+          <div class="result-category">
+            <span class="cat-dot" id="catDot"></span>
+            <span id="catLabel"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step-by-step breakdown -->
+      <div class="breakdown">
+        <div class="breakdown-item">
+          <label>Better Ear MI</label>
+          <value id="beMI">—</value>
+        </div>
+        <div class="breakdown-item">
+          <label>Poorer Ear MI</label>
+          <value id="peMI">—</value>
+        </div>
+        <div class="breakdown-item">
+          <label>Binaural BI</label>
+          <value id="biBI">—</value>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WHO Classification ───────────── -->
+    <div class="who-scale" aria-label="WHO hearing impairment classification">
+      <div class="who-scale-header">WHO Disability Classification</div>
+      <div id="whoRows"></div>
+    </div>
+
+    <!-- ── Formula & Methodology ────────── -->
+    <div class="formula-section">
+      <button class="formula-toggle" id="formulaToggle" aria-expanded="false" aria-controls="formulaBody">
+        <span class="toggle-arrow">▶</span> Formula &amp; Methodology
+      </button>
+      <div class="formula-body" id="formulaBody" role="region">
+        <p><strong>Step 1 — Monaural Impairment (per ear)</strong></p>
+        <code>If PTA ≤ 25 dB HL  →  MI = 0%
+If PTA  > 25 dB HL  →  MI = (PTA − 25) × 1.5%</code>
+        <p><strong>Step 2 — Binaural / Overall Hearing Disability</strong></p>
+        <code>Disability = (5 × Better_Ear_MI + 1 × Poorer_Ear_MI) / 6</code>
+        <p>The better ear is weighted <strong>5× more</strong> because binaural hearing performance is dominated by the better-functioning ear.</p>
+        <p>All PTA values must be within <strong>0 – 120 dB HL</strong>. Final result is capped at 100%.</p>
+        <p style="margin-top:0.6rem; color:var(--text-3);">
+          Reference: American Academy of Otolaryngology (AAO-HNS) ·
+          Indian Disability Evaluation &amp; Assessment Scale (IDEAS)
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <div class="footer">
+    <div class="footer-dev">
+      <span class="footer-dev-label">Developed by</span>
+      <span class="footer-dev-name">Chandan K Rana</span>
+      <span class="footer-dev-role">Consultant Audiologist</span>
+    </div>
+    <p class="footer-legal">
+      &copy; <span id="footerYear"></span> <strong>Audmetrix</strong> · Hearindex&nbsp;&nbsp;|&nbsp;&nbsp;
+      For clinical reference only. Not a substitute for professional audiological evaluation.<br>
+      PTA derived from 500, 1000, 2000 &amp; 4000 Hz thresholds.
+    </p>
+  </div>
+
+</div><!-- /container -->
+
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
+<script>
+
+/* ─────────────────────────────────────────────────
+   THEME MANAGEMENT
+───────────────────────────────────────────────── */
+const html        = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel  = document.getElementById('themeLabel');
+
+/* Load saved preference or detect OS preference */
+(function initTheme() {
+  const saved = localStorage.getItem('hearindex-theme');
+  const preferred = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  applyTheme(preferred);
+})();
+
+function applyTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  themeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+  localStorage.setItem('hearindex-theme', theme);
+}
+
+themeToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+/* ─────────────────────────────────────────────────
+   FOOTER YEAR
+───────────────────────────────────────────────── */
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+/* ─────────────────────────────────────────────────
+   WHO CLASSIFICATION DATA
+───────────────────────────────────────────────── */
+const WHO_GRADES = [
+  { label: 'No Impairment', min: 0,   max: 25,       color: '#00c97e' },
+  { label: 'Slight',        min: 25,  max: 40,        color: '#8ecf4a' },
+  { label: 'Moderate',      min: 40,  max: 60,        color: '#e8b830' },
+  { label: 'Severe',        min: 60,  max: 80,        color: '#f07830' },
+  { label: 'Profound',      min: 80,  max: 100,       color: '#e84848' },
+  { label: 'Complete Loss', min: 100, max: Infinity,  color: '#a01818' },
+];
+
+/* Build WHO rows */
+const whoContainer = document.getElementById('whoRows');
+WHO_GRADES.forEach((g, i) => {
+  const row = document.createElement('div');
+  row.className = 'who-row';
+  row.dataset.gradeIndex = i;
+  const rangeText = g.max === Infinity ? `> ${g.min}%` : `${g.min}% – ${g.max}%`;
+  row.innerHTML = `
+    <span class="who-swatch" style="background:${g.color}"></span>
+    <span class="who-grade">${g.label}</span>
+    <span class="who-range">${rangeText}</span>
+  `;
+  whoContainer.appendChild(row);
+});
+
+/* ─────────────────────────────────────────────────
+   FORMULA FUNCTIONS
+───────────────────────────────────────────────── */
+
+/**
+ * Monaural Impairment for a single ear.
+ * @param {number} pta - Pure Tone Average in dB HL
+ * @returns {number} impairment %
+ */
+function monauralImpairment(pta) {
+  if (pta <= 25) return 0;
+  return (pta - 25) * 1.5;
+}
+
+/**
+ * Binaural hearing disability.
+ * Better ear weighted 5:1 over poorer ear.
+ * @param {number} betterMI
+ * @param {number} poorerMI
+ * @returns {number} binaural disability %
+ */
+function binauralImpairment(betterMI, poorerMI) {
+  return (5 * betterMI + 1 * poorerMI) / 6;
+}
+
+/* ─────────────────────────────────────────────────
+   VALIDATION
+───────────────────────────────────────────────── */
+
+/**
+ * @param {string} raw
+ * @returns {{ value: number|null, error: string }}
+ */
+function validatePTA(raw) {
+  const t = raw.trim();
+  if (t === '')            return { value: null, error: 'Required.' };
+  const n = Number(t);
+  if (isNaN(n))            return { value: null, error: 'Enter a number.' };
+  if (n < 0 || n > 120)   return { value: null, error: 'Range: 0 – 120 dB.' };
+  return { value: n, error: '' };
+}
+
+/* ─────────────────────────────────────────────────
+   DOM REFS
+───────────────────────────────────────────────── */
+const betterInput   = document.getElementById('betterEar');
+const poorerInput   = document.getElementById('poorerEar');
+const betterErr     = document.getElementById('betterEarErr');
+const poorerErr     = document.getElementById('poorerEarErr');
+const calcBtn       = document.getElementById('calcBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const resultPanel   = document.getElementById('resultPanel');
+const resultValue   = document.getElementById('resultValue');
+const catDot        = document.getElementById('catDot');
+const catLabel      = document.getElementById('catLabel');
+const beMI_el       = document.getElementById('beMI');
+const peMI_el       = document.getElementById('peMI');
+const biBI_el       = document.getElementById('biBI');
+const formulaToggle = document.getElementById('formulaToggle');
+const formulaBody   = document.getElementById('formulaBody');
+
+/* ─────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────── */
+function setError(input, errEl, msg) {
+  errEl.textContent = msg;
+  if (msg) {
+    input.classList.add('error');
+    input.setAttribute('aria-invalid', 'true');
+  } else {
+    input.classList.remove('error');
+    input.removeAttribute('aria-invalid');
+  }
+}
+
+function gradeFor(pct) {
+  return WHO_GRADES.find(g => pct >= g.min && pct < g.max) || WHO_GRADES.at(-1);
+}
+
+function highlightGrade(grade) {
+  document.querySelectorAll('.who-row').forEach(row => {
+    row.classList.toggle('active', WHO_GRADES[row.dataset.gradeIndex] === grade);
+  });
+}
+
+/* ─────────────────────────────────────────────────
+   CALCULATE
+───────────────────────────────────────────────── */
+function calculate() {
+  const bVal = validatePTA(betterInput.value);
+  const pVal = validatePTA(poorerInput.value);
+
+  setError(betterInput, betterErr, bVal.error);
+  setError(poorerInput, poorerErr, pVal.error);
+
+  if (bVal.error || pVal.error) {
+    resultPanel.classList.remove('visible');
+    return;
+  }
+
+  /* Auto-correct reversed inputs */
+  let bPTA = bVal.value, pPTA = pVal.value;
+  if (bPTA > pPTA) {
+    setError(betterInput, betterErr, '⚠ Values swapped — better ear has lower PTA.');
+    [bPTA, pPTA] = [pPTA, bPTA];
+  }
+
+  const bMI    = monauralImpairment(bPTA);
+  const pMI    = monauralImpairment(pPTA);
+  const bino   = binauralImpairment(bMI, pMI);
+  const final  = Math.min(bino, 100);
+
+  resultValue.innerHTML = `${final.toFixed(2)}<span>%</span>`;
+  beMI_el.textContent   = bMI.toFixed(2)   + '%';
+  peMI_el.textContent   = pMI.toFixed(2)   + '%';
+  biBI_el.textContent   = final.toFixed(2) + '%';
+
+  const grade = gradeFor(final);
+  catDot.style.background = grade.color;
+  catLabel.textContent    = grade.label;
+  catLabel.style.color    = grade.color;
+
+  highlightGrade(grade);
+  resultPanel.classList.remove('visible');
+  void resultPanel.offsetWidth; /* force reflow for re-animation */
+  resultPanel.classList.add('visible');
+}
+
+/* ─────────────────────────────────────────────────
+   RESET
+───────────────────────────────────────────────── */
+function resetAll() {
+  betterInput.value = '';
+  poorerInput.value = '';
+  setError(betterInput, betterErr, '');
+  setError(poorerInput, poorerErr, '');
+  resultPanel.classList.remove('visible');
+  document.querySelectorAll('.who-row').forEach(r => r.classList.remove('active'));
+}
+
+/* ─────────────────────────────────────────────────
+   REAL-TIME (debounced)
+───────────────────────────────────────────────── */
+let rt;
+function scheduleRT() {
+  clearTimeout(rt);
+  rt = setTimeout(() => {
+    if (betterInput.value.trim() && poorerInput.value.trim()) calculate();
+  }, 420);
+}
+
+betterInput.addEventListener('input', scheduleRT);
+poorerInput.addEventListener('input', scheduleRT);
+
+/* ─────────────────────────────────────────────────
+   EVENTS
+───────────────────────────────────────────────── */
+calcBtn.addEventListener('click', calculate);
+resetBtn.addEventListener('click', resetAll);
+
+[betterInput, poorerInput].forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+});
+
+formulaToggle.addEventListener('click', () => {
+  const open = formulaBody.classList.toggle('open');
+  formulaToggle.setAttribute('aria-expanded', String(open));
+});
+
+</script>
+</body>
+</html>
